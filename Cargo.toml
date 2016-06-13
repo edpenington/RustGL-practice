@@ -1,0 +1,10 @@
+[package]
+name = "piston-tutorial"
+version = "0.1.0"
+authors = ["edpenington <edpenington@gmail.com>"]
+
+[dependencies]
+glutin = "*"
+gl = "*"
+libc = "*"
+glium = "*"
