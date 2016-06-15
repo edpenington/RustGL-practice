@@ -12,22 +12,40 @@ struct Vertex {
 
 implement_vertex!(Vertex,position,color);
 
-
 fn main() {
     use glium::{DisplayBuild};
     let display = glium::glutin::WindowBuilder::new().build_glium().unwrap();
 
-
-    let vertex1 = Vertex { position: [-0.5, -0.5, 0.0],
+    let v1 = Vertex { position: [-0.5, -0.5, 0.5],
                            color: [1.0, 0.0, 0.0]};
-    let vertex2 = Vertex { position: [ 0.0,  0.5, 0.0],
+    let v2 = Vertex { position: [-0.5, 0.5, 0.5],
                            color: [0.0, 1.0, 0.0] };
-    let vertex3 = Vertex { position: [ 0.5, -0.25, 0.0] ,
+    let v3 = Vertex { position: [ 0.5, 0.5, 0.5] ,
                            color: [0.0, 0.0, 1.0] };
-    let shape = vec![vertex1, vertex2, vertex3];
+    let v4 = Vertex { position: [ 0.5,-0.5, 0.5] ,
+                           color: [1.0, 1.0, 1.0] };
+    let v5 = Vertex { position: [-0.5, -0.5,-0.5],
+                           color: [1.0, 0.0, 0.0]};
+    let v6 = Vertex { position: [-0.5, 0.5,-0.5],
+                           color: [0.0, 1.0, 0.0] };
+    let v7 = Vertex { position: [ 0.5, 0.5,-0.5] ,
+                           color: [0.0, 0.0, 1.0] };
+    let v8 = Vertex { position: [ 0.5,-0.5,-0.5] ,
+                           color: [0.0, 0.0, 0.0] };
 
-    let vertex_buffer = glium::VertexBuffer::new(&display, &shape).unwrap();
-    let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
+
+    let vertices = vec![v1, v2, v3, v4, v5, v6, v7, v8];
+    let indices_src = vec![0u8,1u8,2u8,
+                            2u8,3u8,0u8,
+                            0u8,1u8,5u8,
+                            5u8,4u8,0u8,
+                            4u8,5u8,6u8,
+                            6u8,7u8,4u8,
+                            3u8,2u8,7u8,
+                            7u8,6u8,2u8];
+
+    let vertex_buffer = glium::VertexBuffer::new(&display, &vertices).unwrap();
+    let indices = glium::IndexBuffer::new(&display, glium::index::PrimitiveType::TrianglesList, &indices_src).unwrap();
 
     let vertex_shader_src = r#"
         #version 330
@@ -66,7 +84,7 @@ fn main() {
         }
         let uniforms = uniform! {
             matrix: [
-                [r.cos(), r.sin(), 0.0, 0.0],
+                [r.cos(), r.sin(), 0.0, t],
                 [-r.sin(), r.cos(), 0.0, 0.0],
                 [0.0, 0.0, 1.0, 0.0],
                 [ t , 0.0, 0.0, 1.0f32],
