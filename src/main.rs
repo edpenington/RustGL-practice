@@ -4,6 +4,8 @@ extern crate glium;
 use glium::DisplayBuild;
 use glium::Surface;
 
+mod maths;
+
 #[derive(Copy, Clone)]
 struct Vertex {
     position : [f32; 3],
@@ -80,7 +82,12 @@ fn main() {
                             4u8,5u8,6u8,
                             6u8,7u8,4u8,
                             3u8,2u8,7u8,
-                            7u8,6u8,2u8];
+                            7u8,6u8,2u8,
+                            0u8,4u8,7u8,
+                            7u8,3u8,0u8,
+                            1u8,5u8,6u8,
+                            6u8,2u8,1u8
+                            ];
 
     let vertex_buffer = glium::VertexBuffer::new(&display, &vertices).unwrap();
     let indices = glium::IndexBuffer::new(&display, glium::index::PrimitiveType::TrianglesList, &indices_src).unwrap();
