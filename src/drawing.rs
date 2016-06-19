@@ -1,11 +1,43 @@
 extern crate glium;
 
+use maths::vector::Vector3 as Vector3;
 
 #[derive(Copy, Clone)]
 pub struct Vertex {
     pub position : [f32; 3],
     pub color    : [f32; 3],
 }
+
+impl Vertex {
+    fn from_vector3(position: &Vector3, color: &Vector3) -> Vertex
+    {
+        let pos_array = [position.x, position.y, position.z];
+        let col_array = [color.x, color.y, color.z];
+        Vertex {position : pos_array, color: col_array}
+    }
+}
+
+struct Triangle<'a> {
+    vertices : [&'a Vertex;3]
+}
+
+struct Shape<'a> {
+    triangles : Vec<&'a Triangle<'a>>
+}
+
+/*impl Shape {
+
+
+    pub fn as_vert_array(&self) -> Vec<Vertex> {
+        let vert_array: Vec<Vertex> = Vec::new();
+        for tri in &self.triangles {
+            vert_array.push(tri.vertices[0]);
+            vert_array.push(tri.vertices[1]);
+            vert_array.push(tri.vertices[2]);
+        }
+        vert_array
+    }
+}*/
 
 struct View {
     position: [f32;3],
