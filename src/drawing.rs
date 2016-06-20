@@ -9,7 +9,7 @@ pub struct Vertex {
 }
 
 impl Vertex {
-    fn from_vector3(position: &Vector3, color: &Vector3) -> Vertex
+    pub fn from_vector3(position: &Vector3, color: &Vector3) -> Vertex
     {
         let pos_array = [position.x, position.y, position.z];
         let col_array = [color.x, color.y, color.z];
@@ -17,19 +17,39 @@ impl Vertex {
     }
 }
 
-struct Triangle<'a> {
-    vertices : [&'a Vertex;3]
+#[derive(Copy, Clone)]
+struct Triangle {
+    vertices : [Vertex;3]
 }
 
-struct Shape<'a> {
-    triangles : Vec<&'a Triangle<'a>>
+impl Triangle {
+    pub fn from_vertices(v1: Vertex, v2: Vertex, v3: Vertex)
+    -> Triangle
+    {
+        let vertices = [v1,v2,v3];
+        Triangle {vertices : vertices}
+    }
 }
 
-/*impl Shape {
+struct Shape {
+    triangles : Vec<Triangle>
+}
 
+impl Shape {
+
+    pub fn empty() -> Shape
+    {
+        let empty_triangles : Vec<Triangle> = Vec::new();
+        Shape{triangles : empty_triangles}
+    }
+
+    pub fn add_triangle(&mut self, tri: Triangle)
+    {
+        self.triangles.push(tri)
+    }
 
     pub fn as_vert_array(&self) -> Vec<Vertex> {
-        let vert_array: Vec<Vertex> = Vec::new();
+        let mut vert_array: Vec<Vertex> = Vec::new();
         for tri in &self.triangles {
             vert_array.push(tri.vertices[0]);
             vert_array.push(tri.vertices[1]);
@@ -37,7 +57,19 @@ struct Shape<'a> {
         }
         vert_array
     }
-}*/
+
+    pub fn indices(&self) -> Vec<u8>
+    {
+        let mut indices : Vec<u8> = Vec::new();
+        for i in 0..self.triangles.len()
+        {
+            let mut j  = i as u8;
+            j = j - 1;
+            indices.push(j);
+        }
+        indices
+    }
+}
 
 struct View {
     position: [f32;3],
@@ -139,7 +171,7 @@ pub fn draw_rotating_cube() {
     let display = glium::glutin::WindowBuilder::new()
         .with_depth_buffer(24)
         .build_glium().unwrap();
-
+/*
     let v1 = Vertex { position: [-0.5, -0.5, 0.5],
                            color: [1.0, 0.0, 0.0]};
     let v2 = Vertex { position: [-0.5, 0.5, 0.5],
@@ -172,6 +204,24 @@ pub fn draw_rotating_cube() {
                             1u8,5u8,6u8,
                             6u8,2u8,1u8
                             ];
+*/
+
+    let vert1 = Vertex { position: [-0.5, -0.5, 0.5],
+                           color: [1.0, 0.0, 0.0]};
+    let vert2 = Vertex { position: [-0.5, 0.5, 0.5],
+                           color: [0.0, 1.0, 0.0] };
+    let vert3 = Vertex { position: [ 0.5, 0.5, 0.5] ,
+                           color: [0.0, 0.0, 1.0] };
+
+    let triangle = Triangle::from_vertices(
+        vert1,
+        vert2,
+        vert3);
+    let mut shape = Shape::empty();
+    shape.add_triangle(triangle);
+
+    let vertices = shape.as_vert_array();
+    let indices_src = shape.indices();
 
     let vertex_buffer = glium::VertexBuffer::new(&display, &vertices).unwrap();
     let indices = glium::IndexBuffer::new(&display,
