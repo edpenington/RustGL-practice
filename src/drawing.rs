@@ -171,7 +171,7 @@ pub fn draw_rotating_cube() {
     let display = glium::glutin::WindowBuilder::new()
         .with_depth_buffer(24)
         .build_glium().unwrap();
-/*
+
     let v1 = Vertex { position: [-0.5, -0.5, 0.5],
                            color: [1.0, 0.0, 0.0]};
     let v2 = Vertex { position: [-0.5, 0.5, 0.5],
@@ -188,7 +188,7 @@ pub fn draw_rotating_cube() {
                            color: [0.0, 0.0, 1.0] };
     let v8 = Vertex { position: [ 0.5,-0.5,-0.5] ,
                            color: [0.0, 0.0, 0.0] };
-
+/*
 
     let vertices = vec![v1, v2, v3, v4, v5, v6, v7, v8];
     let indices_src = vec![0u8,1u8,2u8,
@@ -206,30 +206,69 @@ pub fn draw_rotating_cube() {
                             ];
 */
 
-    let vert1 = Vertex { position: [-0.5, -0.5, 0.5],
-                           color: [1.0, 0.0, 0.0]};
-    let vert2 = Vertex { position: [-0.5, 0.5, 0.5],
-                           color: [0.0, 1.0, 0.0] };
-    let vert3 = Vertex { position: [ 0.5, 0.5, 0.5] ,
-                           color: [0.0, 0.0, 1.0] };
+    let t1 = Triangle::from_vertices(v1,v2,v3);
+    let t2 = Triangle::from_vertices(v3,v4,v1);
+    let t3 = Triangle::from_vertices(v1,v2,v6);
+    let t4 = Triangle::from_vertices(v6,v5,v1);
+    let t5 = Triangle::from_vertices(v5,v6,v7);
+    let t6 = Triangle::from_vertices(v7,v8,v5);
 
-    let triangle = Triangle::from_vertices(
-        vert1,
-        vert2,
-        vert3);
+
     let mut shape = Shape::empty();
-    shape.add_triangle(triangle);
+    shape.add_triangle(t1);
+    shape.add_triangle(t2);
+    shape.add_triangle(t3);
+    shape.add_triangle(t4);
+    shape.add_triangle(t5);
+    shape.add_triangle(t6);
 
-    let vertices = shape.as_vert_array();
-    let indices_src = shape.indices();
+    let vertices : Vec<Vertex>
+        = shape.as_vert_array();
+    /*let indices_src : Vec<u8>
+        = shape.indices();*/
 
-    let vertex_buffer = glium::VertexBuffer::new(&display, &vertices).unwrap();
-    let indices = glium::IndexBuffer::new(&display,
-        glium::index::PrimitiveType::TrianglesList,
-        &indices_src).unwrap();
+    let vertex_buffer =
+        glium::VertexBuffer::new(
+            &display,
+            &vertices).unwrap();
+    /*let indices =
+        glium::IndexBuffer::new(
+            &display,
+            glium::index::PrimitiveType::TrianglesList,
+            &indices_src).unwrap();*/
+    let indices =
+        glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
 
+    let vertex_shader_simple_src = r#"
+        #version 330
 
-    let vertex_shader_src = r#"
+        in vec3 position;
+        in vec3 color;
+
+        uniform mat4 view;
+
+        out vec3 attr;
+
+        void main() {
+            attr = color;
+            gl_Position = view * vec4(position, 1.0);
+        }
+    "#;
+
+    let fragment_shader_simple_src = r#"
+        #version 330
+
+        in vec3 attr;
+
+        out vec4 color;
+
+        void main() {
+            color = vec4(attr, 1.0);
+        }
+
+    "#;
+
+    /*let vertex_shader_src = r#"
         #version 330
 
         in vec3 position;
@@ -249,9 +288,9 @@ pub fn draw_rotating_cube() {
             attr = color;
             gl_Position = perspective * modelview * vec4(position, 1.0);
         }
-    "#;
+    "#;*/
 
-    let fragment_shader_src = r#"
+    /*let fragment_shader_src = r#"
         #version 330
         in vec3 attr;
         in vec3 v_normal;
@@ -264,55 +303,57 @@ pub fn draw_rotating_cube() {
             vec3 dark_color = vec3(0.1, 0.1, 0.1);
             color = vec4(mix(dark_color,attr,brightness), 1.0);
         }
-    "#;
+    "#;*/
 
-    let program = glium::Program::from_source(&display,
-        vertex_shader_src,
-        fragment_shader_src,
-        None).unwrap();
+    let program =
+        glium::Program::from_source(
+            &display,
+            vertex_shader_simple_src,
+            fragment_shader_simple_src,
+            None).unwrap();
 
 
-    let mut t: f32 = -0.5;
-    let mut r: f32 = 0.0;
+    //let mut t: f32 = -0.5;
+    //let mut r: f32 = 0.0;
 
     let mut player_view = View {
-        position: [2.0, -1.0, 1.0],
-        direction:[-2.0, 1.0, 1.0],
+        position: [2.0, 2.0, -5.0],
+        direction:[0.0, 0.0, 0.0],
         up: [0.0, 1.0, 0.0]
         };
 
     loop {
 
         //Update time-step t
-        t += 0.0002;
-        r += 0.0002;
-        if t > 1.0 {
+        //t += 0.0002;
+        //r += 0.0002;
+        /*if t > 1.0 {
             t = -1.0;
-        }
-
+        }*/
 
         let mut target = display.draw();
 
-        let light = [-1.0, 0.4, 0.9f32];
-        let model = [
-            [r.cos(), r.sin(), 0.0, 0.0],
-            [-r.sin(), r.cos(), 0.0, 0.0],
+        //let light = [-1.0, 0.4, 0.9f32];
+        /*let model = [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
             [0.0, 0.0, 1.0, 0.0],
-            [ t , 0.0, 0.0, 1.0f32],
-        ];
+            [0.0, 0.0, 0.0, 1.0f32],
+        ];*/
 
 
-        let params = glium::DrawParameters {
+        /*let params = glium::DrawParameters {
             depth: glium::Depth {
                 test: glium::draw_parameters::DepthTest::IfLess,
                 write: true,
                 .. Default::default()
             },
             .. Default::default()
-        };
-        player_view.change_position(0.0, 0.0, -t);
+        };*/
+
+        //player_view.change_position(0.0, 0.0, 0.0);
         let view = player_view.as_matrix();
-        let perspective = {
+        /*let perspective = {
             let (width, height) = target.get_dimensions();
             let aspect_ratio = height as f32 / width as f32;
 
@@ -328,15 +369,18 @@ pub fn draw_rotating_cube() {
                 [         0.0         ,    0.0,  (zfar+znear)/(zfar-znear)    ,   1.0],
                 [         0.0         ,    0.0, -(2.0*zfar*znear)/(zfar-znear),   0.0],
             ]
-        };
+        };*/
 
         target.clear_color_and_depth((0.0, 0.0, 1.0, 1.0), 1.0);
-        target.draw(&vertex_buffer, &indices, &program,
+        /*target.draw(&vertex_buffer, &indices, &program,
                     &uniform!{model: model,
                         view: view,
                         perspective: perspective,
                         u_light: light},
-                    &params).unwrap();
+                    &params).unwrap();*/
+        let params = Default::default();
+        let uniforms = uniform!{view : view};
+        target.draw(&vertex_buffer, &indices, &program, &uniforms, &params).unwrap();
         target.finish().unwrap();
 
 
